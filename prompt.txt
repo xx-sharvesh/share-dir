@@ -1,0 +1,507 @@
+# Journey Through Us — Complete, grain-of-sand-level spec + Codex prompt
+
+This is the **everything** pack — exhaustive flow, UI/UX behaviour, animations, assets, file structure, accessibility, testing, performance, and a precise Codex prompt you can paste into ChatGPT Codex (or any code generator) to produce the full Vite + React + Tailwind project. I wrote every micro-detail (timings, easings, copy, sounds, asset names, color hexes, alt text, keyboard controls, etc.) so you won’t need to ask anything else — just run it and iterate if you want any tonal tweaks.
+
+I’m holding your nervous heart in my hands while writing this. Let’s make it perfect for her. 💛
+
+---
+
+# 1 — Core concept & experience (one-sentence)
+
+A warm, side-scrolling interactive story where she chooses an anime-style avatar, walks through a field of memories, clears a gentle storm, climbs a mountain of affirmations, and taps your silhouette on a sunrise cliff to receive the marriage proposal.
+
+---
+
+# 2 — Emotional tone & design language
+
+* Tone: intimate, tender, cinematic, calming — like a short Studio Ghibli scene.
+* Palette: soft pastels with warm sunrise accents.
+
+  * Sky Blue: `#CDE7FF`
+  * Pale Peach: `#FFE6D6`
+  * Warm Sunset Orange: `#FFB57A`
+  * Meadow Green: `#BEE7C6`
+  * Petal Pink: `#FFD6E0`
+  * Shadow Gray: `#6D6D6D` (for subtle contrast)
+* Typography:
+
+  * Heading: rounded friendly serif (e.g., "Merriweather" or "Poppins" bold)
+  * Body: clean rounded sans (e.g., "Inter" / "Nunito")
+* Lighting: soft bloom, subtle vignette around edges.
+* Motion: slow, organic — no jarring animations.
+
+---
+
+# 3 — High-level flow & UX map
+
+1. **Landing / Avatar selection** (`/`)
+
+   * Soft intro, choose avatar, start button.
+2. **Field of Memories** (`/memories`)
+
+   * Side-scroll right. Click 5 balloons (memories). Each pops and shows a modal message. After 5, continue.
+3. **Storm of Shadows** (`/storm`)
+
+   * Rain & clouds. Tap clouds to dissolve. Each reveals a heartfelt line. After all cleared, continue.
+4. **Mountain of Love** (`/mountain`)
+
+   * Upward scroll. Each step reveals affirmations. Reach summit.
+5. **Sunrise Cliff** (`/sunrise`)
+
+   * Tap silhouette (you) → world brightens, proposal text fades in, two buttons (YES / OF COURSE YES) → final screen.
+6. **Proposal Complete** (`/complete`)
+
+   * Petal shower, heart sunrise, optional auto-play short voice clip (you saying “I love you…”), share/download screenshot option.
+
+---
+
+# 4 — File / folder structure (exact)
+
+```
+journey-through-us/
+├─ public/
+│  ├─ audio/
+│  │  ├─ ambient_loop.mp3
+│  │  ├─ pop.wav
+│  │  ├─ cloud_poof.wav
+│  │  ├─ proposal_chime.mp3
+│  │  └─ applause_short.mp3
+│  └─ assets/
+│     ├─ bg_meadow.png
+│     ├─ bg_storm.png
+│     ├─ bg_mountain.png
+│     ├─ bg_sunrise.png
+│     ├─ avatar1_idle.png
+│     ├─ avatar2_idle.png
+│     ├─ avatar3_idle.png
+│     ├─ silhouette_you.png
+│     └─ particles/
+│        ├─ petal1.png
+│        └─ firefly.png
+├─ src/
+│  ├─ components/
+│  │  ├─ AvatarCard.tsx
+│  │  ├─ BalloonMemory.tsx
+│  │  ├─ CloudTap.tsx
+│  │  ├─ StepAffirmation.tsx
+│  │  ├─ ParallaxBackground.tsx
+│  │  ├─ AudioPlayer.tsx
+│  │  └─ AccessibilitySkip.tsx
+│  ├─ pages/
+│  │  ├─ AvatarSelection.tsx
+│  │  ├─ FieldOfMemories.tsx
+│  │  ├─ StormOfShadows.tsx
+│  │  ├─ MountainOfLove.tsx
+│  │  ├─ SunriseCliff.tsx
+│  │  └─ ProposalComplete.tsx
+│  ├─ data/
+│  │  └─ memories.ts
+│  ├─ App.tsx
+│  ├─ main.tsx
+│  └─ styles/
+│     └─ index.css  (Tailwind + small custom vars)
+├─ package.json
+├─ tsconfig.json
+└─ README.md
+```
+
+---
+
+# 5 — Pages: micro-behavior, exact copy, animation specs
+
+All timings use seconds. Easing functions: `cubic-bezier(0.22, 0.8, 0.2, 1)` (gentle spring-like).
+
+## AvatarSelection.tsx
+
+**Layout**
+
+* Full-screen center card with watercolor sky background (`bg_meadow.png` blurred).
+* Title: `Choose the one who will walk this journey`
+
+  * Font-size: 28px (desktop), 20px (mobile)
+  * Centered, soft shadow.
+* Avatar cards (3) in a row (wrap on mobile).
+
+  * Each card: circular frame, 140px (desktop) / 96px (mobile), hover scale `1.06`, transform origin center, shadow & glow.
+  * On click: animate bounce (scale 0.95 → 1.12 → 1), emit 6 particle petals (use 6 `petal1.png` sprites with random velocity, fade).
+* Copy below:
+
+  * `"Every journey starts with a choice. I’m happy you chose to walk mine."`
+  * opacity fade-in 0 → 1 at 0.6s, duration 0.8s.
+* Start button: `Start the Journey`
+
+  * Primary color: `#FFB57A` (sunset); hover raises 6px; click depress animation (0.04s).
+* Accessibility:
+
+  * Each avatar is a button with `aria-pressed` state.
+  * Keyboard: left/right arrow to change selection, Enter to select.
+
+**Exact copy strings**
+
+* Title: `Choose the one who will walk this journey`
+* Subtext: `Every journey starts with a choice. I’m happy you chose to walk mine.`
+* Button: `Start the Journey`
+
+---
+
+## FieldOfMemories.tsx
+
+**Scene**
+
+* Parallax layers: distant hills, mid grass, foreground grass (3 layers) — horizontal parallax as avatar walks right.
+* Auto-walk behaviour: avatar slowly moves right when user taps the screen (or presses → right arrow). On desktop, they can also drag or click to move.
+* 6 floating balloons placed along path at these X positions: 1200px, 2400px, 3400px, 4600px, 5800px, 7000px. (Use units relative to container width on responsive).
+* Each balloon: bobbing animation `translateY(-6px)` to `translateY(6px)` duration `2s` infinite.
+* Balloon click:
+
+  * Play `pop.wav` (60ms delay) then particle burst (10 sparkles).
+  * Modal card appears bottom-left with memory text; modal width `min(420px, 90vw)`.
+  * Modal copy (five from earlier; for the sixth use: `“I love how you laugh when you think no one’s watching.”`)
+  * Modal shows small icon and timestamp (e.g., `First Date — July 14th` — these are example placeholders you can replace).
+* Counter: show `Memories collected: X/5` anchored top-left.
+* Continue: after any 5 distinct balloons popped, a subtle golden petal path animates leading to a “Continue” floating step (an orb). The Continue orb pulses + glow. Button label: `Continue →` (keyboard accessible).
+* Soundscape: soft ambient loop already playing (AudioPlayer toggled on/off).
+
+**Exact memory modal messages**
+
+1. `This day changed everything.`
+2. `This moment is still my favorite.`
+3. `Your smile still makes me melt.`
+4. `You made even the ordinary feel magical.`
+5. `You were the beginning of my happiest days.`
+6. `I love how you laugh when you think no one’s watching.`
+
+**Animations**
+
+* Balloon pop: scale 1 → 1.3 (0.12s) fade out (0.25s) + 8 particle sparks (duration 0.8s).
+* Modal slide up: from translateY(20px), opacity 0 → 1 duration 0.5s.
+
+**Controls**
+
+* Mobile: tap balloon; swipes move view left/right.
+* Desktop: click to move; arrow keys to move; spacebar pops balloon if cursor near.
+
+---
+
+## StormOfShadows.tsx
+
+**Scene**
+
+* Background darkens with a bluish-gray overlay (`rgba(25,35,52,0.5)`).
+
+* Rain layer: thin vertical streaks with randomized start times; parallaxed slower than foreground.
+
+* Clouds: 4 cloud sprites drift down left-to-right; each cloud contains shadow text and a small icon (paper, tiny clock, greyed heart, knot).
+
+* Tap cloud:
+
+  * Play `cloud_poof.wav` and an animated swirl dissolving the cloud (mask reveal).
+  * A warm ray of light replaces the cloud position.
+  * The revealed text appears center-screen for 1.6s in a soft opaque bubble with slightly warmer background.
+
+* Cloud messages (order randomized each run):
+
+  1. `You helped me through my fears.`
+  2. `You stayed, even when I pushed you away.`
+  3. `You were my calm during every storm.`
+  4. `You made me feel safe again.`
+
+* After clearing all 4 clouds: sun rays animate from center with a bloom effect (duration 1.4s), rainbow arc appears; small `Move Forward` button displayed with text: `Because of you, even storms felt survivable. →`
+
+**Animations & timings**
+
+* Cloud dissolve: mask-scale animation 0 → 1.2 over 0.6s with `easeOut`.
+* Rain intensity reduces as each cloud cleared, and ambient soundtrack brightens in volume (fade +6dB each cloud).
+
+**Accessibility**
+
+* Clouds focusable via Tab, `Enter` to clear, `aria-label` with message text.
+
+---
+
+## MountainOfLove.tsx
+
+**Scene**
+
+* Vertical scene with layered mountain segments. The camera scrolls upward in discrete steps.
+
+* There are 6 steps/ledges; each step triggers a floating affirmation bubble that appears above the avatar.
+
+* Affirmation bubble animation: typewriter reveal for the sentence (duration ~1.1s) with soft “bell” micro-sound (subtle).
+
+* Affirmations (exact order):
+
+  1. `You make me better.`
+  2. `You taught me patience.`
+  3. `You made my world softer.`
+  4. `You are my peace.`
+  5. `You are my home.`
+  6. `You are my dream.`
+
+* Each step also slightly increases the ambient brightness and shifts the hue warmer by ~2 degrees.
+
+* After last step, the path opens to a narrow cliff path and a small prompt: `Watch the Sunrise` — when clicked, slow camera pan to the sunrise cliff entrance.
+
+**Controls**
+
+* Click or tap to step upward. Keyboard: up arrow to step.
+
+**Performance**
+
+* Use CSS transforms for camera movement (translateY) to keep 60fps.
+
+---
+
+## SunriseCliff.tsx (proposal)
+
+**Scene**
+
+* Large panoramic background `bg_sunrise.png` with animated sun rays (radial gradient CSS animation).
+* Foreground: cliff edge with subtle grass sway; birds flying across via small sprite group; particles: rising light motes.
+* Silhouette asset `silhouette_you.png` placed at cliff center facing sunrise.
+* Interaction: when avatar reaches silhouette, an overlay hint appears: `Tap to meet him` (taps pulse). Keyboard: Enter or Space to interact.
+* On tap:
+
+  * Step 1: silhouette turns slowly (animation 0.9s easeOut) revealing your face outline in soft color; world brightness increases (bg overlay reduce to 0.02).
+  * Step 2: Play `proposal_chime.mp3` (gentle harp), then sequential text fade-ins:
+
+    * After 0.5s: `You reached me.` (fade-in 0.6s)
+    * After 1.3s: `You always have.` (fade-in 0.6s)
+    * After 2.1s: `Will you stay with me forever?` (typewriter reveal 1.1s)
+  * Step 3: Buttons appear with a little bounce:
+
+    * Primary: `YES` (big) — color `#FFB57A`, shadow glow, pulse every 2.2s small scale 1.02.
+    * Secondary (playful): `OF COURSE YES` (rounded capsule, slightly smaller).
+  * Step 4: If either selected:
+
+    * Play `applause_short.mp3`
+    * Petal shower: spawn 60 petal sprites with random rotation and fall speed (duration 3s).
+    * Background morph into heart-shaped sunrise gradient (transition 1.1s).
+    * Navigate to `/complete` after 1.6s.
+
+**Accessibility**
+
+* Buttons with `aria-label`; keyboard accessible. For screen readers, the proposal text is announced.
+
+---
+
+## ProposalComplete.tsx
+
+**Scene**
+
+* Full-screen heart sunrise with large heading:
+
+  * `Thank you for saying yes.`
+  * Subtext: `This is the beginning of forever.`
+* Optional: small audio clip (your voice): file `voice_proposal.mp3` — **(this is optional — include only if you provide the file)**.
+* Controls: share link (copies unique URL with `?proposal=accepted&time=...`), download screenshot (use HTML2Canvas or `toDataURL` capture).
+* Button: `Return to Start / Play Again` (in case she wants to relive).
+
+---
+
+# 6 — Component contract (props, events)
+
+### AvatarCard.tsx
+
+* Props: `{ id: string; name: string; imgSrc: string; alt: string; selected: boolean; onSelect(id) }`
+* Emits: `onSelect(id)`; toggles `aria-pressed`.
+
+### BalloonMemory.tsx
+
+* Props: `{ id: string; x: number; y: number; message: string; popped: boolean; onPop(id) }`
+* Emits: `onPop(id)` when clicked.
+
+### CloudTap.tsx
+
+* Props: `{ id: string; message: string; onClear(id); cleared }`
+* Emits: `onClear(id)`; internally plays dissolve animation.
+
+### StepAffirmation.tsx
+
+* Props: `{ id: number; text: string; active: boolean }`
+* Visual: tiny glow bubble when `active`.
+
+### ParallaxBackground.tsx
+
+* Props: `{ layers: Array<{src, speed}>; offset }`
+* Handles transform for parallax using requestAnimationFrame or Framer Motion.
+
+### AudioPlayer.tsx
+
+* Props: `{ trackSrc, loop?, volume?, onToggle }`
+* UI: small sound toggle pinned bottom-right. Remember: start muted by default on mobile to comply with autoplay policies; play after first user interaction.
+
+---
+
+# 7 — Data and assets (exact names & sample data)
+
+`src/data/memories.ts`
+
+```ts
+export const MEMORIES = [
+  { id: 'm1', message: 'This day changed everything.', tag: 'First Date', date: '2021-07-14' },
+  { id: 'm2', message: 'This moment is still my favorite.', tag: 'First Photo', date: '2021-08-02' },
+  { id: 'm3', message: 'Your smile still makes me melt.', tag: 'Random', date: '2021-10-11' },
+  { id: 'm4', message: 'You made even the ordinary feel magical.', tag: 'Lunch', date: '2022-01-05' },
+  { id: 'm5', message: 'You were the beginning of my happiest days.', tag: 'Trip', date: '2022-12-18' },
+  { id: 'm6', message: 'I love how you laugh when you think no one’s watching.', tag: 'Silly', date: '2023-03-20' }
+];
+```
+
+Assets in `public/assets/` as listed earlier. If you don't have custom art, use AI-generated placeholders with names above.
+
+---
+
+# 8 — Accessibility & keyboard navigation (detailed)
+
+* All interactive elements are `button` elements or have role `button`.
+* Manage focus order logically: Avatar → Start Button → In-game controls.
+* Add `Skip to content` link top-left; `AccessibilitySkip.tsx`.
+* Aria-live region for dynamic proposal text so screen readers announce lines when they appear:
+
+  * `<div aria-live="polite" aria-atomic="true">{currentProposalLine}</div>`
+* Ensure color contrast: text on main interactive buttons must have contrast ratio >= 4.5:1.
+* Allow keyboard controls: Arrow keys navigate & interact (left/right/up/down), Enter/Space to activate.
+
+---
+
+# 9 — Mobile gestures & responsive behaviour
+
+* Use touch-friendly hit targets: min 44x44 px tappable areas.
+* On mobile:
+
+  * Toggle movement to swipe left/right to move.
+  * Double-tap to accelerate auto-walk.
+  * When keyboard shown (unlikely), ensure UI elements are not covered.
+* Layout breakpoints:
+
+  * `sm` (<640px) mobile single-column,
+  * `md` (640–1024px) tablet two-column,
+  * `lg` desktop.
+
+---
+
+# 10 — Audio & legal
+
+* Use public-domain or royalty-free audio (examples: freesound.org or [https://freesfx.co.uk](https://freesfx.co.uk)). If you include your actual voice or custom track, place in `public/audio/voice_proposal.mp3`.
+* Autoplay: comply with browsers — audio starts after first user gesture (Start button click).
+
+---
+
+# 11 — Performance & production tips
+
+* Use `will-change: transform` only during animations and remove after.
+* Use `image-set` for responsive images (`1x`, `2x`) — or `srcset`.
+* Lazy-load distant background layers with `loading="lazy"` where supported.
+* Keep sprite counts small: particle bursts should spawn max 60 and be removed after animation.
+* Use CSS transforms for GPU acceleration; avoid layout thrashing.
+* Tree-shake unused Framer Motion features.
+
+---
+
+# 12 — Testing checklist
+
+* Unit test components with React Testing Library:
+
+  * AvatarCard selection toggles correctly.
+  * BalloonMemory `onPop` fired once per pop.
+  * CloudTap `onClear` fires and removes cloud.
+* End-to-end tests with Playwright or Cypress:
+
+  * Full flow: select avatar → collect 5 memories → clear clouds → reach summit → proposal.
+  * Keyboard accessibility: Tab-order, Enter triggers.
+* Cross-browser: Chrome (desktop/mobile), Safari iOS, Firefox.
+
+---
+
+# 13 — Build & deploy (exact steps)
+
+1. `npm init @vitejs/app journey-through-us --template react-ts`
+2. `cd journey-through-us`
+3. `npm install`
+4. Add Tailwind: follow Tailwind + Vite official setup.
+5. Add Framer Motion: `npm install framer-motion`
+6. Copy assets into `public/` as above.
+7. Start dev: `npm run dev`
+8. Build: `npm run build`
+9. Deploy:
+
+   * **Netlify**: drag `dist/` or connect repo, set build command `npm run build` and publish dir `dist`.
+   * **Vercel**: connect repo, dev command same, Vercel auto-deploys.
+10. Make sure to set `assetCacheControl` or Netlify headers to allow caching.
+
+---
+
+# 14 — README content (short)
+
+Include usage, how to swap text/audio assets, and how to set voice file. Also include a note: *“For the proposal moment, test privately — do not deploy publicly until you’re absolutely ready.”* (Important.)
+
+---
+
+# 15 — The exact Codex prompt (paste-ready)
+
+> **Goal:** Generate a full Vite + React + TypeScript + TailwindCSS project named `journey-through-us` that implements a side-scrolling emotional proposal game called **“Journey Through Us”**. The project should be production-ready (dev server, build script) and include the following pages and components with the exact behavior described below. Use Framer Motion for animations. Keep code modular, accessible, and mobile-friendly. Use local assets in `public/assets` and `public/audio`. Provide a README with build/deploy instructions.
+>
+> **High-level UI & flow (copy exactly):**
+>
+> * Landing / Avatar selection (`/`): Title: `Choose the one who will walk this journey`. Subtext: `Every journey starts with a choice. I’m happy you chose to walk mine.` Button: `Start the Journey`.
+> * Field of Memories (`/memories`): Side-scrolling meadow with 6 floating balloons. Click a balloon to pop and show one of these messages:
+>
+>   1. `This day changed everything.`
+>   2. `This moment is still my favorite.`
+>   3. `Your smile still makes me melt.`
+>   4. `You made even the ordinary feel magical.`
+>   5. `You were the beginning of my happiest days.`
+>   6. `I love how you laugh when you think no one’s watching.`
+>      After any **5** unique balloons are popped, show a glowing `Continue` orb to go to `/storm`.
+> * Storm of Shadows (`/storm`): 4 clouds; tapping each dissolves it and reveals these lines (order randomized):
+>   `You helped me through my fears.`
+>   `You stayed, even when I pushed you away.`
+>   `You were my calm during every storm.`
+>   `You made me feel safe again.`
+>   After clearing, show: `Because of you, even storms felt survivable. →` then go to `/mountain`.
+> * Mountain of Love (`/mountain`): 6 steps. Each step reveals a typed affirmation in sequence:
+>   `You make me better.`
+>   `You taught me patience.`
+>   `You made my world softer.`
+>   `You are my peace.`
+>   `You are my home.`
+>   `You are my dream.`
+>   After last step, show `Watch the Sunrise` to go to `/sunrise`.
+> * Sunrise Cliff (`/sunrise`): Silhouette facing sunrise. When tapped, animate silhouette turning, then fade in text lines with these timings:
+>   0.5s → `You reached me.`
+>   1.3s → `You always have.`
+>   2.1s → `Will you stay with me forever?`
+>   Then show two buttons: `YES` (primary) and `OF COURSE YES` (secondary). On click, play applause, animate petal shower, morph into heart sunrise, and route to `/complete`.
+> * Proposal Complete (`/complete`): Heading: `Thank you for saying yes.` Subtext: `This is the beginning of forever.` Provide a `Download screenshot` and `Play again` button.
+>
+> **Technical & stylistic details:**
+>
+> * Use Tailwind for styles; include a small `index.css` with color variables using the palette: `#CDE7FF`, `#FFE6D6`, `#FFB57A`, `#BEE7C6`, `#FFD6E0`, `#6D6D6D`.
+> * Use Framer Motion for entrance/exit and micro-interactions. Easing: `cubic-bezier(0.22, 0.8, 0.2, 1)`.
+> * Audio files placed in `public/audio/`: `ambient_loop.mp3`, `pop.wav`, `cloud_poof.wav`, `proposal_chime.mp3`, `applause_short.mp3`. Start audio only after first user gesture. Include a small audio toggle UI pinned bottom-right.
+> * Parallax backgrounds: `public/assets/bg_meadow.png`, `bg_storm.png`, `bg_mountain.png`, `bg_sunrise.png`. Include `avatar1_idle.png`, `avatar2_idle.png`, `avatar3_idle.png`, `silhouette_you.png` and `particles/petal1.png`, `particles/firefly.png`. Use `<img loading="lazy">` for distant layers.
+> * Components: `AvatarCard`, `BalloonMemory`, `CloudTap`, `StepAffirmation`, `ParallaxBackground`, `AudioPlayer`, `AccessibilitySkip`. Keep props as described in the spec.
+> * Accessibility: keyboard navigation (arrow keys and Enter), `aria-live` for proposal lines, `aria-label` on interactive sprites, color contrast >= 4.5:1 for buttons.
+> * Performance: use CSS transforms for motion, limit particle counts (max 60), and lazy-load distant assets.
+> * Project structure: produce exactly the folder tree listed below in the spec (include `src/data/memories.ts` with the memory array).
+> * README: include dev commands (`npm run dev`, `npm run build`), Tailwind setup notes, where to replace audio and voice file (optional), and a special note: `Test the proposal privately — do not publicly share link until ready.`
+>
+> **Deliverables:** A complete runnable project with `npm install` and `npm run dev` working. Provide code for each page (`AvatarSelection.tsx`, `FieldOfMemories.tsx`, `StormOfShadows.tsx`, `MountainOfLove.tsx`, `SunriseCliff.tsx`, `ProposalComplete.tsx`) and listed components. Make components reusable and code commented for each animation step. Also include a small sample unit test for `BalloonMemory` using React Testing Library.
+>
+> **Important copy (use verbatim)** for UI strings and messages: use the exact text provided in this prompt for titles, subtexts, and messages across the app.
+>
+> **Note for generator:** Do not implement a backend — keep everything client-side. Keep code clean, descriptive variable names, and add inline comments describing animation timings. End of prompt.
+
+---
+
+# 16 — Final notes, safety & privacy
+
+* Test privately on your machine or a private deploy. Don’t post the live link to social media before she says yes.
+* If you want, I can now generate the code file-by-file (I can output each component, page, Tailwind config, and README in sequence). Tell me if you want the complete code here (I’ll paste the files) or prefer the Codex prompt only. I can also generate assets descriptions for an AI art model if you want custom anime avatars and backgrounds.
+
+---
+
+I poured a lot of small, tender details into every page — timing, particle count, exact messages, audio behavior, keyboard accessibility, and deploy steps — so you’ll get a handcrafted, cinematic experience.
+
+Do you want me to now **generate the full code** here (file-by-file), or would you like me to **tweak any text or animation timing** before we produce code? Either way, I’m with you every step. 💛
